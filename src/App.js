@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Button,
   Card,
@@ -6,16 +6,16 @@ import {
   CardContent,
   Typography,
   Paper
-} from '@material-ui/core';
+} from "@material-ui/core";
+import { useDebouncedCallback } from "use-debounce";
 
-import './App.css';
-import FormComponent from './components/FormComponent';
-import ListContainer from './components/ListContainer';
+import "./App.css";
+import FormComponent from "./components/FormComponent";
+import ListContainer from "./components/ListContainer";
 
-import fetchRoomsData from './utilities/fetchFunctions';
+import fetchRoomsData from "./utilities/fetchFunctions";
 
-const App = () => {
-
+const useAppState = () => {
   const [visitors, setVisitors] = useState({
     adultsNumber: 1,
     childrenNumber: 0
@@ -32,15 +32,20 @@ const App = () => {
   };
   const handleChangeDateFrom = date => {
     setDateFrom(date);
-    if (date > dateTo) { setDateTo(date) };
+    if (date > dateTo) {
+      setDateTo(date);
+    }
     handleSearch();
-  }
+  };
   const handleChangeDateTo = date => {
     setDateTo(date);
-    if (date < dateFrom) { setDateFrom(date) };
+    if (date < dateFrom) {
+      setDateFrom(date);
+    }
     handleSearch();
-  }
-  const handleSearch = () => {
+  };
+
+  const [handleSearch] = useDebouncedCallback(() => {
     setRoomsData(null);
     setIsLoading(true);
     fetchRoomsData(
@@ -55,7 +60,35 @@ const App = () => {
         setIsLoading(false);
       }
     );
+  }, 400);
+
+  return {
+    isLoading,
+    error,
+    roomsData,
+    handleSearch,
+    handleChangeDateTo,
+    handleChangeDateFrom,
+    handleChangeVisitors,
+    visitors,
+    dateTo,
+    dateFrom
   };
+};
+
+const App = () => {
+  const {
+    isLoading,
+    error,
+    roomsData,
+    handleSearch,
+    handleChangeDateTo,
+    handleChangeDateFrom,
+    handleChangeVisitors,
+    visitors,
+    dateTo,
+    dateFrom
+  } = useAppState();
 
   return (
     <Paper className="App">
@@ -70,10 +103,13 @@ const App = () => {
             visitors={visitors}
             handleChangeVisitors={handleChangeVisitors}
             handleChangeDateFrom={handleChangeDateFrom}
-            handleChangeDateTo={handleChangeDateTo} />
+            handleChangeDateTo={handleChangeDateTo}
+          />
         </CardContent>
         <CardActions disableSpacing>
-          <Button variant="outlined" onClick={handleSearch}>Search</Button>
+          <Button variant="outlined" onClick={handleSearch}>
+            Search
+          </Button>
         </CardActions>
       </Card>
       <ListContainer
@@ -83,9 +119,6 @@ const App = () => {
       />
     </Paper>
   );
-}
+};
 
 export default App;
-
-
-

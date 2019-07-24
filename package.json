@@ -12,7 +12,8 @@
     "jsonp": "^0.2.1",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
-    "react-scripts": "3.0.1"
+    "react-scripts": "3.0.1",
+    "use-debounce": "^2.2.0"
   },
   "scripts": {
     "predeploy": "npm run build",
