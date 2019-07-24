@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Button,
   Card,
@@ -7,7 +7,6 @@ import {
   Typography,
   Paper
 } from "@material-ui/core";
-import { useDebouncedCallback } from "use-debounce";
 
 import "./App.css";
 import FormComponent from "./components/FormComponent";
@@ -20,34 +19,18 @@ const useAppState = () => {
     adultsNumber: 1,
     childrenNumber: 0
   });
+
   const [dateFrom, setDateFrom] = useState(new Date());
   const [dateTo, setDateTo] = useState(new Date());
+
   const [roomsData, setRoomsData] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleChangeVisitors = name => event => {
-    setVisitors({ ...visitors, [name]: event.target.value });
-    handleSearch();
-  };
-  const handleChangeDateFrom = date => {
-    setDateFrom(date);
-    if (date > dateTo) {
-      setDateTo(date);
-    }
-    handleSearch();
-  };
-  const handleChangeDateTo = date => {
-    setDateTo(date);
-    if (date < dateFrom) {
-      setDateFrom(date);
-    }
-    handleSearch();
-  };
-
-  const [handleSearch] = useDebouncedCallback(() => {
+  const handleSearch = () => {
     setRoomsData(null);
     setIsLoading(true);
+
     fetchRoomsData(
       {
         dateFrom: dateFrom,
@@ -60,7 +43,43 @@ const useAppState = () => {
         setIsLoading(false);
       }
     );
-  }, 400);
+  };
+
+  const searchCallback = useCallback(handleSearch, [
+    dateFrom,
+    dateTo,
+    setError,
+    setIsLoading,
+    setRoomsData,
+    visitors
+  ]);
+
+  useEffect(() => {
+    const handler = window.setTimeout(() => {
+      // Run handle search when callback got new data
+      searchCallback();
+    }, 500);
+
+    return () => {
+      window.clearTimeout(handler);
+    };
+  }, [searchCallback]);
+
+  const handleChangeVisitors = name => event => {
+    setVisitors({ ...visitors, [name]: event.target.value });
+  };
+  const handleChangeDateFrom = date => {
+    setDateFrom(date);
+    if (date > dateTo) {
+      setDateTo(date);
+    }
+  };
+  const handleChangeDateTo = date => {
+    setDateTo(date);
+    if (date < dateFrom) {
+      setDateFrom(date);
+    }
+  };
 
   return {
     isLoading,
