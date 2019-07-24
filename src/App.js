@@ -122,6 +122,8 @@ const App = () => {
           />
         </CardContent>
         <CardActions disableSpacing>
+          {/* It doesn't have to be debounced. User will, probably, not click at */}
+          {/* this button at some insane rate */}
           <Button variant="outlined" onClick={handleSearch}>
             Search
           </Button>
