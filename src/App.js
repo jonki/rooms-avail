@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   Button,
   Card,
@@ -7,6 +7,7 @@ import {
   Typography,
   Paper
 } from "@material-ui/core";
+import debounce from "debounce";
 
 import "./App.css";
 import FormComponent from "./components/FormComponent";
@@ -45,25 +46,20 @@ const useAppState = () => {
     );
   };
 
-  const searchCallback = useCallback(handleSearch, [
+  // useRef is required so debounced handleSearch will not be recreated on each render
+  const debouncedSearch = useRef(debounce(handleSearch, 500));
+
+  useEffect(() => {
+    debouncedSearch.current();
+  }, [
     dateFrom,
     dateTo,
+    debouncedSearch,
     setError,
     setIsLoading,
     setRoomsData,
     visitors
   ]);
-
-  useEffect(() => {
-    const handler = window.setTimeout(() => {
-      // Run handle search when callback got new data
-      searchCallback();
-    }, 500);
-
-    return () => {
-      window.clearTimeout(handler);
-    };
-  }, [searchCallback]);
 
   const handleChangeVisitors = name => event => {
     setVisitors({ ...visitors, [name]: event.target.value });
